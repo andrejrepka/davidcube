@@ -13,10 +13,11 @@
       background-color: black;
       margin: 0;
       perspective: 800px;
+      overflow: hidden;
     }
 
     .cube {
-      position: relative;
+      position: absolute;
       width: 200px;
       height: 200px;
       transform-style: preserve-3d;
@@ -45,7 +46,7 @@
   </style>
 </head>
 <body>
-  <div class="cube">
+  <div class="cube" id="cube">
     <div class="face front"></div>
     <div class="face back"></div>
     <div class="face left"></div>
@@ -53,5 +54,40 @@
     <div class="face top"></div>
     <div class="face bottom"></div>
   </div>
+
+  <script>
+    const cube = document.getElementById('cube');
+    let xPos = 100;
+    let yPos = 100;
+    let xSpeed = 4;
+    let ySpeed = 3;
+
+    // Update the position of the cube every frame
+    function animate() {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      // Move the cube
+      xPos += xSpeed;
+      yPos += ySpeed;
+
+      // Check for screen boundaries and reverse direction if needed
+      if (xPos + cube.offsetWidth > screenWidth || xPos < 0) {
+        xSpeed = -xSpeed;
+      }
+      if (yPos + cube.offsetHeight > screenHeight || yPos < 0) {
+        ySpeed = -ySpeed;
+      }
+
+      // Set the new position of the cube
+      cube.style.left = `${xPos}px`;
+      cube.style.top = `${yPos}px`;
+
+      // Call animate function on the next frame
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
 </body>
 </html>
