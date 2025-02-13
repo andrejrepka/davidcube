@@ -18,26 +18,26 @@
 
     .cube {
       position: absolute;
-      width: 200px;
-      height: 200px;
+      width: 400px;  /* Doubled the width */
+      height: 400px; /* Doubled the height */
       transform-style: preserve-3d;
       animation: rotateCube 5s infinite linear;
     }
 
     .face {
       position: absolute;
-      width: 200px;
-      height: 200px;
+      width: 400px;  /* Doubled the width */
+      height: 400px; /* Doubled the height */
       background: url('danko.png') no-repeat center/cover;
       border: 2px solid white;
     }
 
-    .front  { transform: translateZ(100px); }
-    .back   { transform: rotateY(180deg) translateZ(100px); }
-    .left   { transform: rotateY(-90deg) translateZ(100px); }
-    .right  { transform: rotateY(90deg) translateZ(100px); }
-    .top    { transform: rotateX(90deg) translateZ(100px); }
-    .bottom { transform: rotateX(-90deg) translateZ(100px); }
+    .front  { transform: translateZ(200px); }
+    .back   { transform: rotateY(180deg) translateZ(200px); }
+    .left   { transform: rotateY(-90deg) translateZ(200px); }
+    .right  { transform: rotateY(90deg) translateZ(200px); }
+    .top    { transform: rotateX(90deg) translateZ(200px); }
+    .bottom { transform: rotateX(-90deg) translateZ(200px); }
 
     @keyframes rotateCube {
       from { transform: rotateX(0) rotateY(0); }
@@ -57,31 +57,95 @@
 
   <script>
     const cube = document.getElementById('cube');
+    const faces = document.querySelectorAll('.face');
     let xPos = 100;
     let yPos = 100;
     let xSpeed = 4;
     let ySpeed = 3;
 
-    // Update the position of the cube every frame
+    // Images to cycle through
+    const images = ['danko.png', 'fico.png', 'kalinak.png', 'huliak.png', 'matovic.png'];
+    let imageIndex = 0;
+
+    // Function to change cube faces to the next image
+    function changeCubeImage() {
+      imageIndex = (imageIndex + 1) % images.length;
+      faces.forEach(face => {
+        face.style.backgroundImage = `url('${images[imageIndex]}')`;
+      });
+    }
+
+    // Variables for mouse drag functionality
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    // Mouse down event to start dragging
+    cube.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      cube.style.animation = 'none'; // Disable the rotation animation while dragging
+    });
+
+    // Mouse move event to move the cube while dragging
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+
+        xPos += deltaX;
+        yPos += deltaY;
+
+        // Set the new position of the cube
+        cube.style.left = `${xPos}px`;
+        cube.style.top = `${yPos}px`;
+
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      }
+    });
+
+    // Mouse up event to stop dragging and "throw" the cube
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+
+        // Calculate the speed based on how far the mouse moved
+        xSpeed = (Math.random() * 8 - 4) || 4;
+        ySpeed = (Math.random() * 8 - 4) || 4;
+
+        // Re-enable the rotation animation after releasing the cube
+        cube.style.animation = 'rotateCube 5s infinite linear';
+      }
+    });
+
+    // Update the position of the cube every frame (animation part)
     function animate() {
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
 
       // Move the cube
-      xPos += xSpeed;
-      yPos += ySpeed;
+      if (!isDragging) {
+        xPos += xSpeed;
+        yPos += ySpeed;
 
-      // Check for screen boundaries and reverse direction if needed
-      if (xPos + cube.offsetWidth > screenWidth || xPos < 0) {
-        xSpeed = -xSpeed;
-      }
-      if (yPos + cube.offsetHeight > screenHeight || yPos < 0) {
-        ySpeed = -ySpeed;
-      }
+        // Check for screen boundaries and reverse direction if needed
+        if (xPos + cube.offsetWidth > screenWidth || xPos < 0) {
+          xSpeed = -xSpeed;
+          changeCubeImage(); // Change image on horizontal wall hit
+        }
+        if (yPos + cube.offsetHeight > screenHeight || yPos < 0) {
+          ySpeed = -ySpeed;
+          changeCubeImage(); // Change image on vertical wall hit
+        }
 
-      // Set the new position of the cube
-      cube.style.left = `${xPos}px`;
-      cube.style.top = `${yPos}px`;
+        // Set the new position of the cube
+        cube.style.left = `${xPos}px`;
+        cube.style.top = `${yPos}px`;
+      }
 
       // Call animate function on the next frame
       requestAnimationFrame(animate);
